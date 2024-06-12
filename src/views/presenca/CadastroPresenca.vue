@@ -1,141 +1,135 @@
 <template>
-    <a-container title="Cadastro de Presenca">
-      <v-form ref="form" lazy-validation color="transparent">
-        <v-row align="center">
-          <v-col>
-              <v-select label="Aula" :items="aula.map(presenca => presenca.nomeAula)" v-model="presenca.selectedAula"/>  
-                <v-text-field v-model="presenca.presente" label="Presença" />
-          </v-col>
-          <v-col>
-              <v-select label="Aluno" :items="aluno.map(presenca => presenca.nomeAluno)" v-model="presenca.selectedAluno"/>  
-            <v-text-field v-model="presenca.outrosAtributosPresenca" label="Outros Atributos" /> 
-          </v-col>
-        </v-row>
-      </v-form>
-      <v-container>
-        <v-row justify="center" class="bottom_salvar">
-          <v-col cols="auto">
-            <a-btn
-              buttonName="Salvar"
-              v-on:click="salvar"
-              :needIcon="true"
-              style="background-color: gray; color: white"
-              :needLoading="buttonLoading"
-            />
-          </v-col>
-        </v-row>
-      </v-container>
-    </a-container>
-  </template>
-  
-  <script>
-  import * as usuarioService from "@/service/UsuarioService";
-  import * as reajaService from "@/service/ReajaService";
-  import {exibirMensagemErroApi,exibirMensagemSucesso,exibirMensagemErro,} from "@/util/MessageUtils.js";
-  export default {
-    components: {},
-    name: "CadastroPresenca",
-    data() {
-      return {
-        aula: [],
-        aluno: [],
-        presenca: {
-          selectedAula: null, 
-          selectedAluno: null, 
-          outrosAtributosPresenca: "",
-          presente: "",
-        },
-      };
-    },
-    mounted(){
-              if(this.isEditar){
-                  this.listarReaja();
-              }
-        this.listarUsuarios(); 
-          },
-      computed: {
-              isEditar(){
-                  return this.$route.params?.id;
-              },
-          },
-    methods: {
-      listarUsuarios() {
-        usuarioService.default
-      .listarUsuariosSelect()
-      .then(({ data }) => {
-        this.aula = data.content;
-      })
-      .catch((error) => {
-        exibirMensagemErroApi(
-          error?.response?.data,
-          "Não foi possível listar os usuários!. Tente novamente mais tarde."
-        );
-        console.log(error);
-      });
+  <a-container title="Cadastro de Presença">
+    <v-form ref="form" lazy-validation color="transparent">
+      <v-row align="center">
+        <v-col>
+          <v-select
+            label="Aula"
+            :items="aula.map(aula => aula.disciplina)"
+            v-model="presenca.aula"
+          />
+          <v-text-field v-model="presenca.presenca" label="Presença" />        </v-col>
+        <v-col>
+          <v-select
+            label="Aluno"
+            :items="aluno.map(aluno => aluno.nomeAluno)"
+            v-model="presenca.aluno"
+          />
+          <v-text-field
+            v-model="presenca.outrosAtributosPresenca"
+            label="Outros Atributos"
+          />
+        </v-col>
+      </v-row>
+    </v-form>
+    <v-container>
+      <v-row justify="center" class="bottom_salvar">
+        <v-col cols="auto">
+          <a-btn
+            buttonName="Salvar"
+            v-on:click="salvar"
+            :needIcon="true"
+            style="background-color: gray; color: white"
+            :needLoading="buttonLoading"
+          />
+        </v-col>
+      </v-row>
+    </v-container>
+  </a-container>
+</template>
+
+<script>
+import * as PresencaService from "@/service/PresencaService";
+import * as AlunoService from "@/service/AlunoService";
+import * as AulaService from "@/service/AulaService";
+import { exibirMensagemErroApi, exibirMensagemSucesso } from "@/util/MessageUtils.js";
+
+export default {
+  name: "CadastroPresenca",
+  data() {
+    return {
+      aula: [],
+      aluno: [],
+      presenca: {
+        aula: null,
+        aluno: null,
+        outrosAtributosPresenca: "",
+        presenca: "",
+      },
+      buttonLoading: false,
+    };
   },
-      listarReaja(){
-                      reajaService.default
-                          .atualizar(this.isEditar)
-                          .then(({ data }) => {
-                              this.usuario = data;
-                          }).catch((error) => {
-                              exibirMensagemErroApi(error?.response?.data, "Não foi possível listar o cadastro reaja!. Tente novamente mais tarde.");
-                              console.log(error);
-                          })
-                          .finally(() => {
-                              this.$finalizarCarregando();
-                          });
-              },
-      salvar() {
-        if (!this.usuario.selectedUsuario) {
-         exibirMensagemErro("Selecione um usuário!");
-          return;
-        }
-        const usuarioSelecionado = this.usuarios.find(usuario => usuario.nomeCompleto === this.usuario.selectedUsuario);
-        if (!usuarioSelecionado) {
-          exibirMensagemErro("Usuário selecionado não encontrado!");
-          return;
-        }
-        const idUsuarioSelecionado = usuarioSelecionado.id;
-        const novoAssociado = {
-          selectedUsuario: idUsuarioSelecionado,
-          retiro: this.usuario.retiro
-        };
-        reajaService.default
-          .salvarAssociados(novoAssociado)
-          .then(() => {
-            this.usuario = {};
-            this.buttonLoading = false;
-            exibirMensagemSucesso("Cadastro em REAJA realizado com sucesso!");
-          })
-          .catch((error) => {
-            this.buttonLoading = false;
-            exibirMensagemErroApi(
-              error.response?.data,
-              "Erro ao salvar cadastro!. Tente novamente mais tarde."
-            );
-          })
-          .finally(() => {
-            this.$router.push("/cadastro-reaja");
-          });
-      },
-      atualizar() {
-        reajaService.default
-          .atualizar(this.isEditar, this.usuario)
-          .then(() => {
-            this.buttonLoading = false;
-            exibirMensagemSucesso("Usuario atualizado com sucesso!");
-            this.$router.push("/cadastro-reaja");
-          })
-          .catch((error) => {
-            this.buttonLoading = false;
-            exibirMensagemErroApi(
-              error.response?.data,
-              "Erro ao atualizar cadastro!. Tente novamente mais tarde."
-            );
-          });
-      },
+  mounted() {
+    if (this.isEditar) {
+      this.listarPresenca();
+    }
+    this.listarAlunos();
+    this.listarAulas();
+  },
+  computed: {
+    isEditar() {
+      return this.$route.params?.id;
     },
-  };
-  </script>
-  
+  },
+  methods: {
+    listarAlunos() {
+      AlunoService.default
+        .listar()
+        .then(({ data }) => {
+          this.aluno = data;
+        })
+        .catch((error) => {
+          exibirMensagemErroApi(
+            error?.response?.data,
+            "Não foi possível listar os alunos! Tente novamente mais tarde."
+          );
+          console.error(error);
+        });
+    },
+    listarAulas() {
+      AulaService.default
+        .listar()
+        .then(({ data }) => {
+          this.aula = data;
+        })
+        .catch((error) => {
+          exibirMensagemErroApi(
+            error?.response?.data,
+            "Não foi possível listar as aulas! Tente novamente mais tarde."
+          );
+          console.error(error);
+        });
+    },
+    listarPresenca() {
+      PresencaService.default
+        .buscarPresenca(this.$route.params.id)
+        .then(({ data }) => {
+          this.presenca = data;
+        })
+        .catch((error) => {
+          exibirMensagemErroApi(
+            error?.response?.data,
+            "Não foi possível buscar a presença! Tente novamente mais tarde."
+          );
+          console.error(error);
+        });
+    },
+    salvar() {
+      PresencaService.default
+        .cadastrarPresenca(this.presenca)
+        .then(() => {
+          this.buttonLoading = false;
+          exibirMensagemSucesso("Presença cadastrada com sucesso!");
+          this.$router.push("/cadastro-presenca");
+        })
+        .catch((error) => {
+          this.buttonLoading = false;
+          exibirMensagemErroApi(
+            error?.response?.data,
+            "Erro ao cadastrar presença! Tente novamente mais tarde."
+          );
+        });
+    },
+  },
+};
+</script>

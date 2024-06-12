@@ -1,141 +1,111 @@
 <template>
-    <a-container title="Cadastro de Matricula">
-      <v-form ref="form" lazy-validation color="transparent">
-        <v-row align="center">
-          <v-col>
-                <v-select label="Disciplina" :items="disciplina.map(matricula => matricula.nomeDisciplina)" v-model="matricula.selectedDisciplina"/>  
-                <v-text-field v-model="matricula.anoMatricula" label="Ano da Matricula" v-mask="'####'" />
-          </v-col>
-          <v-col>
-              <v-select label="Aluno" :items="aluno.map(matricula => matricula.nomeAluno)" v-model="matricula.selectedAluno"/>  
-            <v-text-field v-model="matricula.outrosAtributosMatricula" label="Outros Atributos" /> 
-          </v-col>
-        </v-row>
-      </v-form>
-      <v-container>
-        <v-row justify="center" class="bottom_salvar">
-          <v-col cols="auto">
-            <a-btn
-              buttonName="Salvar"
-              v-on:click="salvar"
-              :needIcon="true"
-              style="background-color: gray; color: white"
-              :needLoading="buttonLoading"
-            />
-          </v-col>
-        </v-row>
-      </v-container>
-    </a-container>
-  </template>
-  
-  <script>
-  import * as usuarioService from "@/service/UsuarioService";
-  import * as reajaService from "@/service/ReajaService";
-  import {exibirMensagemErroApi,exibirMensagemSucesso,exibirMensagemErro,} from "@/util/MessageUtils.js";
-  export default {
-    components: {},
-    name: "CadastroMatricula",
-    data() {
-      return {
-        disciplina: [],
-        aluno: [],
-        matricula: {
-          selectedDisciplina: null, 
-          selectedAluno: null, 
-          outrosAtributosMatricula: "",
-          anoMatricula: "",
-        },
-      };
-    },
-    mounted(){
-              if(this.isEditar){
-                  this.listarReaja();
-              }
-        this.listarUsuarios(); 
-          },
-      computed: {
-              isEditar(){
-                  return this.$route.params?.id;
-              },
-          },
-    methods: {
-      listarUsuarios() {
-        usuarioService.default
-      .listarUsuariosSelect()
-      .then(({ data }) => {
-        this.aula = data.content;
-      })
-      .catch((error) => {
-        exibirMensagemErroApi(
-          error?.response?.data,
-          "Não foi possível listar os usuários!. Tente novamente mais tarde."
-        );
-        console.log(error);
-      });
+  <a-container title="Cadastro de Matrícula">
+    <v-form ref="form" lazy-validation color="transparent">
+      <v-row align="center">
+        <v-col>
+          <v-select
+            label="Disciplina"
+            :items="disciplina.map(disciplina => disciplina.nomeDisciplina)"
+            v-model="matricula.disciplina"
+          />
+          <v-text-field v-model="matricula.anoMatricula" label="Ano da Matrícula" v-mask="'####'" />
+        </v-col>
+        <v-col>
+          <v-select
+            label="Aluno"
+            :items="aluno.map(aluno => aluno.nomeAluno)"
+            v-model="matricula.aluno"
+          />
+          <v-text-field v-model="matricula.outrosAtributosMatricula" label="Outros Atributos" /> 
+        </v-col>
+      </v-row>
+    </v-form>
+    <v-container>
+      <v-row justify="center" class="bottom_salvar">
+        <v-col cols="auto">
+          <a-btn
+            buttonName="Salvar"
+            v-on:click="salvar"
+            :needIcon="true"
+            style="background-color: gray; color: white"
+            :needLoading="buttonLoading"
+          />
+        </v-col>
+      </v-row>
+    </v-container>
+  </a-container>
+</template>
+
+<script>
+import * as disciplinaService from "@/service/DisciplinaService";
+import * as alunoService from "@/service/AlunoService";
+import * as matriculaService from "@/service/MatriculaService";
+import {exibirMensagemErroApi, exibirMensagemSucesso} from "@/util/MessageUtils.js";
+
+export default {
+  name: "CadastroMatricula",
+  data() {
+    return {
+      disciplina: [],
+      aluno: [],
+      matricula: {
+        disciplina: null, 
+        aluno: null, 
+        outrosAtributosMatricula: "",
+        anoMatricula: "",
+      },
+      buttonLoading: false,
+    };
   },
-      listarReaja(){
-                      reajaService.default
-                          .atualizar(this.isEditar)
-                          .then(({ data }) => {
-                              this.usuario = data;
-                          }).catch((error) => {
-                              exibirMensagemErroApi(error?.response?.data, "Não foi possível listar o cadastro reaja!. Tente novamente mais tarde.");
-                              console.log(error);
-                          })
-                          .finally(() => {
-                              this.$finalizarCarregando();
-                          });
-              },
-      salvar() {
-        if (!this.usuario.selectedUsuario) {
-         exibirMensagemErro("Selecione um usuário!");
-          return;
-        }
-        const usuarioSelecionado = this.usuarios.find(usuario => usuario.nomeCompleto === this.usuario.selectedUsuario);
-        if (!usuarioSelecionado) {
-          exibirMensagemErro("Usuário selecionado não encontrado!");
-          return;
-        }
-        const idUsuarioSelecionado = usuarioSelecionado.id;
-        const novoAssociado = {
-          selectedUsuario: idUsuarioSelecionado,
-          retiro: this.usuario.retiro
-        };
-        reajaService.default
-          .salvarAssociados(novoAssociado)
-          .then(() => {
-            this.usuario = {};
-            this.buttonLoading = false;
-            exibirMensagemSucesso("Cadastro em REAJA realizado com sucesso!");
-          })
-          .catch((error) => {
-            this.buttonLoading = false;
-            exibirMensagemErroApi(
-              error.response?.data,
-              "Erro ao salvar cadastro!. Tente novamente mais tarde."
-            );
-          })
-          .finally(() => {
-            this.$router.push("/cadastro-reaja");
-          });
-      },
-      atualizar() {
-        reajaService.default
-          .atualizar(this.isEditar, this.usuario)
-          .then(() => {
-            this.buttonLoading = false;
-            exibirMensagemSucesso("Usuario atualizado com sucesso!");
-            this.$router.push("/cadastro-reaja");
-          })
-          .catch((error) => {
-            this.buttonLoading = false;
-            exibirMensagemErroApi(
-              error.response?.data,
-              "Erro ao atualizar cadastro!. Tente novamente mais tarde."
-            );
-          });
-      },
+  mounted() {
+    this.listarDisciplinas();
+    this.listarAlunos();
+  },
+  methods: {
+    listarDisciplinas() {
+      disciplinaService.default
+        .listar()
+        .then(({ data }) => {
+          this.disciplina = data;
+        })
+        .catch((error) => {
+          exibirMensagemErroApi(error?.response?.data, "Erro ao listar disciplinas");
+          console.log(error);
+        });
     },
-  };
-  </script>
-  
+    listarAlunos() {
+      alunoService.default
+        .listar()
+        .then(({ data }) => {
+          this.aluno = data;
+        })
+        .catch((error) => {
+          exibirMensagemErroApi(error?.response?.data, "Erro ao listar alunos");
+          console.log(error);
+        });
+    },
+    salvar() {
+      this.buttonLoading = true;
+      matriculaService.default
+        .salvarMatricula(this.matricula)
+        .then(() => {
+          exibirMensagemSucesso("Matrícula cadastrada com sucesso!");
+          this.resetForm();
+        })
+        .catch((error) => {
+          exibirMensagemErroApi(error?.response?.data, "Erro ao cadastrar matrícula");
+          console.log(error);
+        })
+        .finally(() => {
+          this.buttonLoading = false;
+        });
+    },
+    resetForm() {
+      this.matricula.disciplina = null;
+      this.matricula.aluno = null;
+      this.matricula.outrosAtributosMatricula = "";
+      this.matricula.anoMatricula = "";
+    },
+  },
+};
+</script>

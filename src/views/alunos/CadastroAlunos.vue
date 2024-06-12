@@ -1,108 +1,116 @@
 <template>
-	<a-container title="Cadastro de Alunos">
-		<v-form ref="form" lazy-validation color="transparent">
-			<h2 class="mb-4" style="margin-left: 0;">Dados aluno</h2>
-			<v-row align="center">
-				<v-col>
-					<v-text-field v-model="alunos.nomeAluno" label="Nome aluno" />
-				</v-col>
-				<v-col>
-					<v-text-field v-model="alunos.dataNascimentoAluno" label="Data Nascimento" v-mask="'##-##-####'" />
-				</v-col>
-				<v-col>
-					<v-text-field v-model="alunos.outrosAtributosAluno" label="Outros Atributos" />
-				</v-col>
-			</v-row>
-		</v-form>
+  <a-container title="Cadastro de Alunos">
+    <v-form ref="form" lazy-validation color="transparent">
+      <h2 class="mb-4" style="margin-left: 0;">Dados aluno</h2>
+      <v-row align="center">
+        <v-col>
+          <v-text-field v-model="aluno.nomeAluno" label="Nome aluno" />
+        </v-col>
+        <v-col>
+          <v-text-field v-model="aluno.dataNascimentoAluno" label="Data Nascimento" v-mask="'##-##-####'" />
+        </v-col>
+        <v-col>
+          <v-text-field v-model="aluno.outrosAtributosAluno" label="Outros Atributos" />
+        </v-col>
+      </v-row>
+    </v-form>
 
-		<v-container>
-			<v-row justify="end">
-				<v-col cols="auto">
-					<a-btn
+    <v-container>
+      <v-row justify="end">
+        <v-col cols="auto">
+          <a-btn
             buttonName="Salvar"
             v-on:click="salvar"
             :needIcon="true"
             style="background-color: gray; color: white"
             :needLoading="buttonLoading"
           />
-				</v-col>
-			</v-row>
-		</v-container>
+        </v-col>
+      </v-row>
+    </v-container>
 
-	</a-container>
+  </a-container>
 </template>
 
-
 <script>
-import * as UsuarioService from "@/service/UsuarioService";
-import { exibirMensagemErroApi, exibirMensagemSucesso, } from "@/util/MessageUtils.js";
+import AlunoService from "@/service/AlunoService";
+import { exibirMensagemErroApi, exibirMensagemSucesso } from "@/util/MessageUtils.js";
 
 export default {
-  components: {},
   name: "CadastroAlunos",
-  mounted(){
-			if(this.isEditar){
-				this.listarAssociado();
-			}
-		},
-  computed: {
-    isEditar() {
-      return this.$route.params?.id;
-    },
-  },
   data() {
     return {
-	alunos: this.newAlunos(),
-    buttonLoading: false,
-    emailDisabled: false,
+      aluno: this.newAluno(),
+      buttonLoading: false,
+      isEditar: false, // Se o aluno está sendo editado ou não
     };
   },
+  mounted() {
+    // Verifica se é uma edição com base nos parâmetros da rota
+    if (this.$route.params?.id) {
+      this.isEditar = true;
+      this.buscarAluno();
+    }
+  },
   methods: {
-    newAlunos() {
+    newAluno() {
       return {
         nomeAluno: "",
         dataNascimentoAluno: "",
         outrosAtributosAluno: "",
-        
       };
     },
-    handleDateSelected(date) {
-      this.dataSelecionada = date;
+    buscarAluno() {
+      // Se for uma edição, busca o aluno pelo ID
+      AlunoService.buscarAluno(this.$route.params.id)
+        .then((response) => {
+          this.aluno = response.data;
+        })
+        .catch((error) => {
+          exibirMensagemErroApi(
+            error?.response?.data,
+            "Não foi possível buscar o aluno! Tente novamente mais tarde."
+          );
+          console.error(error);
+        });
     },
-	listarAssociado(){
-				if(this.isEditar){
-					UsuarioService
-						.buscarUsuario(this.isEditar)
-						.then(({ data }) => {
-							this.usuario = data;
-						}).catch((error) => {
-							exibirMensagemErroApi(error?.response?.data, "Não foi possível listar o usuário!. Tente novamente mais tarde.");
-							console.log(error);
-						})
-						.finally(() => {
-							this.$finalizarCarregando();
-						});
-				}
-			},
     salvar() {
-      console.log(this.usuario);
-      UsuarioService
-        .cadastrarUsuario(this.usuario)
+      this.buttonLoading = true;
+      // Verifica se é uma edição ou um novo cadastro
+      if (this.isEditar) {
+        this.atualizarAluno();
+      } else {
+        this.cadastrarAluno();
+      }
+    },
+    cadastrarAluno() {
+      AlunoService.cadastrarAluno(this.aluno)
         .then(() => {
-          this.usuario = {}; // Se necessário, limpe os dados após o salvamento
           this.buttonLoading = false;
-          exibirMensagemSucesso("Usuário criado com sucesso!");
+          exibirMensagemSucesso("Aluno cadastrado com sucesso!");
+          this.$router.push("/cadastro-alunos");
         })
         .catch((error) => {
           this.buttonLoading = false;
           exibirMensagemErroApi(
-            error.response?.data,
-            "Erro ao salvar usuário! Tente novamente mais tarde."
+            error?.response?.data,
+            "Erro ao cadastrar aluno! Tente novamente mais tarde."
           );
+        });
+    },
+    atualizarAluno() {
+      AlunoService.atualizarAluno(this.$route.params.id, this.aluno)
+        .then(() => {
+          this.buttonLoading = false;
+          exibirMensagemSucesso("Aluno atualizado com sucesso!");
+          this.$router.push("/cadastro-alunos");
         })
-        .finally(() => {
-          this.usuario = this.newUsuario();
-          this.$router.push("/cadastro-usuario");
+        .catch((error) => {
+          this.buttonLoading = false;
+          exibirMensagemErroApi(
+            error?.response?.data,
+            "Erro ao atualizar aluno! Tente novamente mais tarde."
+          );
         });
     },
   },

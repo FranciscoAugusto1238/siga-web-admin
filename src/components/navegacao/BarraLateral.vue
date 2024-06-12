@@ -77,7 +77,6 @@ import ListaMenu from "@/components/navegacao/ListaMenu.vue";
 						icone: "mdi-account-group",
 						to: "/",
 						items: [
-							{ titulo: "Reaja",  to: "/cadastro-reaja" },
 							{ titulo: "Professor",  to: "/cadastro-professor" },
 							{ titulo: "Aluno",  to: "/cadastro-alunos" },
 							{ titulo: "Disciplina",  to: "/cadastro-disciplina" },
