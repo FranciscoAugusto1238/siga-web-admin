@@ -99,7 +99,19 @@ import ListaMenu from "@/components/navegacao/ListaMenu.vue";
 						icone: "mdi-account-group",
 						to: "/",
 						items: [
-							{ titulo: "Reaja",  to: "/listar-reaja" },
+							{ titulo: "Aluno",  to: "/listar-aluno" },
+							{ titulo: "Aulas",  to: "/listar-aulas" },
+							{ titulo: "Professores",  to: "/listar-professores" },
+							{ titulo: "Salas",  to: "/listar-salas" },
+							{ titulo: "Disciplinas",  to: "/listar-disciplinas" },
+							{ titulo: "Matriculas",  to: "/listar-matriculas" },
+							{ titulo: "Presencas",  to: "/listar-presencas" },
+							{ titulo: "Entregas",  to: "/listar-entregas" },
+							{ titulo: "Atividades",  to: "/listar-atividades" },
+							{ titulo: "Mensagens",  to: "/listar-mensagens" },
+							{ titulo: "Notas",  to: "/listar-notas" },
+
+
 						],
 					},
 				],

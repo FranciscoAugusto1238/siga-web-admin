@@ -1,6 +1,6 @@
 <template>
     <div class="welcome-screen">
-      <h1>Bem-vindo ao sistema administrativo da AOM</h1>
+      <h1>Bem-vindo ao sistema SIGA FAKE</h1>
       <p class="development-message">Estamos em desenvolvimento...</p>
     </div>
   </template>

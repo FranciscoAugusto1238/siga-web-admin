@@ -76,7 +76,6 @@ export default {
     },
     salvar() {
       this.buttonLoading = true;
-      // Verifica se é uma edição ou um novo cadastro
       if (this.isEditar) {
         this.atualizarAluno();
       } else {

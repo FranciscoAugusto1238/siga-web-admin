@@ -41,11 +41,10 @@ export default {
     return {
       professor: this.newProfessor(),
       buttonLoading: false,
-      isEditar: false, // Se o professor está sendo editado ou não
+      isEditar: false,
     };
   },
   mounted() {
-    // Verifica se é uma edição com base nos parâmetros da rota
     if (this.$route.params?.id) {
       this.isEditar = true;
       this.buscarProfessor();

@@ -93,6 +93,72 @@ const routesPadrao = [
         component: () => import('../views/reaja/ListarReaja.vue'),
         meta: { requiresAuth: false },
       },
+      {
+        path: '/listar-aluno/:id?',
+        name: "ListarAlunos", 
+        component: () => import('../views/alunos/ListarAlunos.vue'),
+        meta: { requiresAuth: false },
+      },
+      {
+        path: '/listar-aulas/:id?',
+        name: "ListarAulas", 
+        component: () => import('../views/aulas/ListarAulas.vue'),
+        meta: { requiresAuth: false },
+      },
+      {
+        path: '/listar-professores/:id?',
+        name: "ListarProfessores", 
+        component: () => import('../views/professor/ListarProfessores.vue'),
+        meta: { requiresAuth: false },
+      },
+      {
+        path: '/listar-salas/:id?',
+        name: "ListarSalas", 
+        component: () => import('../views/sala/ListarSalas.vue'),
+        meta: { requiresAuth: false },
+      },
+      {
+        path: '/listar-disciplinas/:id?',
+        name: "ListarDisciplinas", 
+        component: () => import('../views/disciplina/ListarDisciplinas.vue'),
+        meta: { requiresAuth: false },
+      },
+      {
+        path: '/listar-matriculas/:id?',
+        name: "ListarMatriculas", 
+        component: () => import('../views/matriculas/ListarMatriculas.vue'),
+        meta: { requiresAuth: false },
+      },
+      {
+        path: '/listar-presencas/:id?',
+        name: "ListarPresencas", 
+        component: () => import('../views/presenca/ListarPresencas.vue'),
+        meta: { requiresAuth: false },
+      },
+      {
+        path: '/listar-entregas/:id?',
+        name: "ListarEntregas", 
+        component: () => import('../views/entrega/ListarEntregas.vue'),
+        meta: { requiresAuth: false },
+      },
+      {
+        path: '/listar-atividades/:id?',
+        name: "ListarAtividades", 
+        component: () => import('../views/atividades/ListarAtividades.vue'),
+        meta: { requiresAuth: false },
+      },
+      {
+        path: '/listar-mensagens/:id?',
+        name: "ListarMensagens", 
+        component: () => import('../views/mensagem/ListarMensagens.vue'),
+        meta: { requiresAuth: false },
+      },
+      {
+        path: '/listar-notas/:id?',
+        name: "ListarNotas", 
+        component: () => import('../views/notas/ListarNotas.vue'),
+        meta: { requiresAuth: false },
+      },
     ]
 
   }
